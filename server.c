@@ -1,13 +1,13 @@
 #include "mini_talk.h"
 
-void bit_receiver(int signum)
+void bit_receiver(int sig, siginfo_t *info, void *context)
 {
     static char c = 0;
     static int     i = 0;
-
-    if (signum == SIGUSR1)
+    (void) context;
+    if (sig == SIGUSR1)
         c = (c << 1);
-    else if (signum == SIGUSR2)
+    else if (sig == SIGUSR2)
         c = (c << 1) | 1;
     
     i++;
@@ -17,6 +17,7 @@ void bit_receiver(int signum)
         i = 0;
         c = 0;
     }
+    kill(info->si_pid, SIGUSR1);
 }
 
 int main()
@@ -25,9 +26,9 @@ int main()
     char *s = ft_itoa(pid);
     struct sigaction sa;
 
-    sa.sa_handler = bit_receiver;
+    sa.sa_sigaction = bit_receiver;
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_SIGINFO;
     sigaction(SIGUSR1, &sa, NULL);
     sigaction(SIGUSR2, &sa, NULL);
     int i = -1;
