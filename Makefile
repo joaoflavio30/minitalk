@@ -1,10 +1,23 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: jcardoso <jcardoso@student.42.rio>         +#+  +:+       +#+        #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/05/06 13:31:23 by jcardoso          #+#    #+#              #
+#    Updated: 2025/05/06 13:31:24 by jcardoso         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME_SERVER = server
 NAME_CLIENT = client
 
-C_SOURCE = client.c server.c
+SRCS_SERVER = server.c
+SRCS_CLIENT = client.c
 
-OBJS_SERVER = server.o
-OBJS_CLIENT = client.o
+OBJS_SERVER = $(SRCS_SERVER:.c=.o)
+OBJS_CLIENT = $(SRCS_CLIENT:.c=.o)
 
 LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
@@ -23,15 +36,15 @@ $(NAME_SERVER): $(OBJS_SERVER)
 $(NAME_CLIENT): $(OBJS_CLIENT)
 	$(CC) $(CFLAGS) $(OBJS_CLIENT) $(LIBFT) -o $(NAME_CLIENT)
 
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(B_OBJECTS)
+	rm -f $(OBJS_SERVER) $(OBJS_CLIENT)
 	$(MAKE) -C $(LIBFT_DIR) clean
 
 fclean: clean
-	rm -f $(NAME)
+	rm -f $(NAME_SERVER) $(NAME_CLIENT)
 	$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all
