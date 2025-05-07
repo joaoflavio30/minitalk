@@ -32,25 +32,41 @@ void	bit_receiver(int sig, siginfo_t *info, void *context)
 	kill(info->si_pid, SIGUSR1);
 }
 
-int	main(void)
+static int	setup_signal_handlers(struct sigaction *sa)
 {
-	pid_t				pid;
-	int					i;
-	char				*s;
-	struct sigaction	sa;
+	sa->sa_sigaction = bit_receiver;
+	sigemptyset(&sa->sa_mask);
+	sa->sa_flags = SA_SIGINFO;
+	if (sigaction(SIGUSR1, sa, NULL) == -1 || sigaction(SIGUSR2, sa, NULL) == -1)
+		return (0);
+	return (1);
+}
+
+static int	print_pid(void)
+{
+	pid_t	pid;
+	char	*s;
+	int		i;
 
 	pid = getpid();
 	s = ft_itoa(pid);
-	sa.sa_sigaction = bit_receiver;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_SIGINFO;
-	sigaction(SIGUSR1, &sa, NULL);
-	sigaction(SIGUSR2, &sa, NULL);
+	if (!s)
+		return (0);
 	i = -1;
 	while (s[++i])
-	{
 		write(1, &s[i], 1);
-	}
+	free(s);
+	return (1);
+}
+
+int	main(void)
+{
+	struct sigaction	sa;
+
+	if (!print_pid())
+		return (1);
+	if (!setup_signal_handlers(&sa))
+		return (1);
 	while (1)
 		pause();
 	return (0);

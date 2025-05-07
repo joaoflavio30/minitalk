@@ -37,20 +37,37 @@ void	send_bit(int c, int pid)
 	}
 }
 
+static int	setup_signal_handler(struct sigaction *sa)
+{
+	sa->sa_handler = ack_handler;
+	sigemptyset(&sa->sa_mask);
+	sa->sa_flags = 0;
+	if (sigaction(SIGUSR1, sa, NULL) == -1)
+		return (0);
+	return (1);
+}
+
+static int	validate_args(int argc, char **argv, int *server_pid)
+{
+	if (argc != 3)
+		return (0);
+	*server_pid = ft_atoi(argv[1]);
+	if (*server_pid <= 0)
+		return (0);
+	return (1);
+}
+
 int	main(int argc, char **argv)
 {
 	struct sigaction	sa;
 	int					i;
 	int					server_pid;
 
-	i = -1;
-	if (argc != 3)
+	if (!validate_args(argc, argv, &server_pid))
 		return (1);
-	sa.sa_handler = ack_handler;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sigaction(SIGUSR1, &sa, NULL);
-	server_pid = ft_atoi(argv[1]);
+	if (!setup_signal_handler(&sa))
+		return (1);
+	i = -1;
 	while (argv[2][++i])
 		send_bit(argv[2][i], server_pid);
 	return (0);
